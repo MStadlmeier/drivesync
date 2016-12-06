@@ -51,16 +51,28 @@ class DriveManager
   end
 
   #Loads file metadata from drive and stores them in remote_files with full paths
-  def get_files fields = nil
-    fields = fields || "files(id, name, parents, mime_type, sharedWithMeTime, modifiedTime, createdTime)"
+  def get_files
+    fields = "next_page_token, files(id, name, parents, mime_type, sharedWithMeTime, modifiedTime, createdTime)"
+
     #Todo : Use pagination
-    results = @service.list_files(q: "not trashed", fields: fields, page_size: 999)
+    folders = []
+    @files = []
+
+    #Go through pages of files and save files and folders
+    next_token = nil
+    first_page = true
+    while first_page || (!next_token.nil? && !next_token.empty?)
+      results = @service.list_files(q: "not trashed", fields: fields, page_token: next_token)
+      folders += results.files.select{|file| file.mime_type == DRIVE_FOLDER_TYPE and file.shared_with_me_time == nil}
+      @files += results.files.select{|file| !file.mime_type.include?(DRIVE_FILES_TYPE) and file.shared_with_me_time == nil}
+      next_token = results.next_page_token
+      first_page = false
+    end
 
     #Cache folders
-    folders = results.files.select{|file| file.mime_type == DRIVE_FOLDER_TYPE and file.shared_with_me_time == nil}
     folders.each {|folder| @folder_cache[folder.id] = folder}
 
-    @files = results.files.select{|file| !file.mime_type.include?(DRIVE_FILES_TYPE) and file.shared_with_me_time == nil}
+    #Resolve file paths and apply ignore list
     @files.each {|file| file.path = resolve_path file}
     @files.reject!{|file| @ignore_list.include? file.path}
 
