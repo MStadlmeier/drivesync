@@ -4,6 +4,7 @@ require 'googleauth/stores/file_token_store'
 require 'fileutils'
 require './file'
 require './logger'
+require './google_overrides'
 
 include Log
 
@@ -41,16 +42,17 @@ class DriveManager
     credentials
   end
 
-  def initialize app_name
+  def initialize app_name, ignore_list
     @service = Google::Apis::DriveV3::DriveService.new
     @service.client_options.application_name = app_name
     @service.authorization = authorize
     @folder_cache = {}
+    @ignore_list = ignore_list
   end
 
   #Loads file metadata from drive and stores them in remote_files with full paths
   def get_files fields = nil
-    fields = fields || "files(id, name, parents, mime_type, sharedWithMeTime, modifiedTime)"
+    fields = fields || "files(id, name, parents, mime_type, sharedWithMeTime, modifiedTime, createdTime)"
     #Todo : Use pagination
     results = @service.list_files(q: "not trashed", fields: fields, page_size: 999)
 
@@ -60,6 +62,7 @@ class DriveManager
 
     @files = results.files.select{|file| !file.mime_type.include?(DRIVE_FILES_TYPE) and file.shared_with_me_time == nil}
     @files.each {|file| file.path = resolve_path file}
+    @files.reject!{|file| @ignore_list.include? file.path}
 
     Log.log_notice "Counted #{@files.count} remote files in #{folders.count} folders"
   end
@@ -86,7 +89,8 @@ class DriveManager
     remote_file.name = local_path.split('/').last
     remote_file.parents = [folder.id] unless folder.nil?
 
-    puts @service.create_file(remote_file, upload_source: File.join(local_root, local_path))
+    fields = "id, name, mime_type, createdTime, modifiedTime"
+    @service.create_file(remote_file, fields: fields, upload_source: File.join(local_root, local_path))
   end
 
   def trash_file file
@@ -95,6 +99,13 @@ class DriveManager
     file = @service.get_file file.id, fields: "trashed"
     file.trashed = true
     @service.update_file(file.id, file)
+  end
+
+  def update local_root, file
+    return if file.nil?
+    #Hack : This call returns a server error for mime type plain/text. Very likely a server bug
+    content_type = file.mime_type == "plain/text" ? "text/x-c" : file.mime_type
+    @service.update_file(file.id, content_type: content_type, upload_source: File.join(local_root, file.path))
   end
 
   private
