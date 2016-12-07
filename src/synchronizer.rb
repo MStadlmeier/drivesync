@@ -222,7 +222,8 @@ class Synchronizer
 	  diff = get_diff drive, local
 	  Log.log_message "Local folder is #{diff.remote_ahead.count} files behind and #{diff.local_ahead.count} files ahead of remote"
 	  load_manifest @config['manifest_path']
-    return
+
+    Log.log_message "Starting sync at #{Time.now}"
 	  sync diff, drive, local
 
     Log.log_notice "Deleting lock file..."

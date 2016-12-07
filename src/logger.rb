@@ -1,5 +1,5 @@
-#0 = nothing, 1 = errors, 2 = warnings, 3 = notices
-LOG_LEVEL = 3
+#0 = nothing, 1 = errors, 2 = messages, 3 = notices
+LOG_LEVEL = 2
 
 module Log
   def log_error message
