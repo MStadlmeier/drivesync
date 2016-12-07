@@ -5,10 +5,10 @@ require 'json'
 require 'yaml'
 
 require 'fileutils'
-require './drive_manager'
-require './file'
-require './local_manager'
-require './time'
+require './src/drive_manager'
+require './src/file'
+require './src/local_manager'
+require './src/time'
 
 include Log
 
@@ -222,7 +222,7 @@ class Synchronizer
 	  diff = get_diff drive, local
 	  Log.log_message "Local folder is #{diff.remote_ahead.count} files behind and #{diff.local_ahead.count} files ahead of remote"
 	  load_manifest @config['manifest_path']
-
+    return
 	  sync diff, drive, local
 
     Log.log_notice "Deleting lock file..."

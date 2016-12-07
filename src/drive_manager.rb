@@ -2,8 +2,8 @@ require 'google/apis/drive_v3'
 require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'fileutils'
-require './file'
-require './logger'
+require './src/file'
+require './src/logger'
 
 include Log
 
