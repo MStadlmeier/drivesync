@@ -54,7 +54,6 @@ class DriveManager
   def get_files
     fields = "next_page_token, files(id, name, parents, mime_type, sharedWithMeTime, modifiedTime, createdTime)"
 
-    #Todo : Use pagination
     folders = []
     @files = []
 

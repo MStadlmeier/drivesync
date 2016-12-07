@@ -16,6 +16,7 @@ APPLICATION_NAME = 'DriveSync'
 LOCAL_ROOT = "/home/max/Documents/drive"
 MANIFEST_PATH = "/home/max/.drivesync_manifest"
 IGNORE_LIST_PATH = "/home/max/Documents/drive/.ignore_list.txt"
+LOCK_PATH = "/tmp/drivesync.lock"
 
 #If set to true, DriveSync will delete files from your drive if they have been deleted locally
 ALLOW_REMOTE_DELETION = true
@@ -180,7 +181,35 @@ class Synchronizer
     Log.log_message "\nSync complete."
 	end
 
+  #Returns true if there is currently a sync going on
+  def check_lock
+    if File.file? LOCK_PATH
+      pid = File.read LOCK_PATH
+      Log.log_message "There is already a sync in progress! - PID : #{pid}"
+      true
+    else
+      false
+    end
+  end
+
+  def write_lock
+    Log.log_notice "Writing lock file #{LOCK_PATH} ..."
+    File.open(LOCK_PATH, 'w') {|file| file.write Process.pid}
+  end
+
 	def run
+    if check_lock
+      Log.log_message "Exiting."
+      return
+    end
+
+    begin
+      write_lock
+    rescue
+      Log.log_error "Could not write lock file!"
+      return
+    end
+
     ignore_list = IgnoreList.new IGNORE_LIST_PATH
 
 	  drive = DriveManager.new APPLICATION_NAME, ignore_list
@@ -196,5 +225,8 @@ class Synchronizer
 	  load_manifest MANIFEST_PATH
 
 	  sync diff, drive, local
+
+    Log.log_notice "Deleting lock file..."
+    File.delete LOCK_PATH rescue nil
 	end
 end
