@@ -4,7 +4,6 @@ require 'googleauth/stores/file_token_store'
 require 'fileutils'
 require './file'
 require './logger'
-require './google_overrides'
 
 include Log
 
@@ -106,16 +105,17 @@ class DriveManager
 
   def trash_file file
     return if file.nil?
+    id = file.id
     #Get version of the file with only the 'trashed' attribute
-    file = @service.get_file file.id, fields: "trashed"
+    file = @service.get_file id, fields: "trashed"
     file.trashed = true
-    @service.update_file(file.id, file)
+    @service.update_file(id, file)
   end
 
   def update local_root, file
     return if file.nil?
     #Hack : This call returns a server error for mime type plain/text. Very likely a server bug
-    content_type = file.mime_type == "plain/text" ? "text/x-c" : file.mime_type
+    content_type = file.mime_type == "text/plain" ? "text/x-c" : file.mime_type
     @service.update_file(file.id, content_type: content_type, upload_source: File.join(local_root, file.path))
   end
 

@@ -76,7 +76,6 @@ class Synchronizer
 
   def update_remote_file file, drive
     Log.log_message "Updating remote file #{file.path} ..."
-    gets
     drive.update LOCAL_ROOT, file
   end
 
