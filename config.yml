@@ -1,0 +1,22 @@
+#Path for your local drive folder
+drive_path: "~/drive"
+#Path for the file which keeps track of synced files
+manifest_path: "~/.drivesync_manifest"
+
+#If true, files that have been deleted locally will also be deleted on drive
+allow_remote_deletion: true
+#If true, the manifest will be re-written after each file. Slows down sync but prevents problems
+immediate_rewrite: true
+
+#Determines what will be done if a file has been edited locally and remotely
+#keep_latest => Syncs whichever version has been edited last
+#keep_remote => Downloads the remote version and overwrites local changes
+#keep_local =>  Uploads the local version and overwrites remote changes
+#ignore => Does nothing and keeps both versions
+update_conflict_strategy: keep_latest
+
+#The file you generated with your client secret which is required for authentication
+client_secret_path: "client_secret.json"
+
+#Add a list of file paths (relative to drive root) that should not be synced. Regexes are allowed
+ignored_files: []

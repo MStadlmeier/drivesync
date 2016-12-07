@@ -2,34 +2,19 @@ require 'google/apis/drive_v3'
 require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'json'
+require 'yaml'
 
 require 'fileutils'
 require './drive_manager'
 require './file'
 require './local_manager'
 require './time'
-require './ignore_list'
 
 include Log
 
 APPLICATION_NAME = 'DriveSync'
-LOCAL_ROOT = "/home/max/Documents/drive"
-MANIFEST_PATH = "/home/max/.drivesync_manifest"
-IGNORE_LIST_PATH = "/home/max/Documents/drive/.ignore_list.txt"
 LOCK_PATH = "/tmp/drivesync.lock"
-
-#If set to true, DriveSync will delete files from your drive if they have been deleted locally
-ALLOW_REMOTE_DELETION = true
-
-#If set to true, changes to manifest will always be saved immediately. Slower, but safer
-IMMEDIATE_REWRITE = true
-
-#Determines what happens when a file is modified locally and remotely.
-#:keep_latest keeps whichever version has been modified last
-#:keep_remote always downloads the remote version
-#:keep_local always pushes the local version
-#:ignore keeps both versions separate and updates the manifest
-UPDATE_CONFLICT_STRATEGY = :keep_latest
+CONFIG_PATH = "config.yml"
 
 class Synchronizer
 
@@ -54,14 +39,14 @@ class Synchronizer
     Log.log_message "#{update ? 'Updating' : 'Downloading'} file #{file.path} ..."
     #Make folder if it doesn't exist yet
     path = file.path.sub(file.path.split('/')[-1], '')
-    FileUtils.mkdir_p File.join(LOCAL_ROOT, path)
+    FileUtils.mkdir_p File.join(@config['drive_path'], path)
 
-    drive.download file, File.join(LOCAL_ROOT, file.path)
+    drive.download file, File.join(@config['drive_path'], file.path)
   end
 
   def delete_local_file path
     Log.log_message "Deleting file #{path} locally..."
-    FileUtils.rm(File.join LOCAL_ROOT, path)
+    FileUtils.rm(File.join @config['drive_path'], path)
   end
 
   def delete_remote_file file, drive
@@ -71,17 +56,18 @@ class Synchronizer
 
   def upload_file path, drive
     Log.log_message "Uploading file #{path} ..."
-    drive.upload LOCAL_ROOT, path
+    drive.upload @config['drive_path'], path
   end
 
   def update_remote_file file, drive
     Log.log_message "Updating remote file #{file.path} ..."
-    drive.update LOCAL_ROOT, file
+    drive.update @config['drive_path'], file
   end
 
   def resolve_conflict file, drive, latest_local, latest_remote
     Log.log_message "Resolving conflict for #{file.path}"
-    case UPDATE_CONFLICT_STRATEGY
+    strategy = @config['update_conflict_strategy'].to_sym
+    case strategy
     when :ignore
       return
     when :keep_local
@@ -95,7 +81,7 @@ class Synchronizer
         download_file file, drive, true
       end
     else
-      Log.log_error "Unrecognized update conflict strategy : #{UPDATE_CONFLICT_STRATEGY}"
+      Log.log_error "Unrecognized update conflict strategy : #{strategy}"
     end
   end
 
@@ -104,14 +90,14 @@ class Synchronizer
 
     @manifest[path] = {}
     @manifest[path]["remote_modified"] = file.modified_time.nil? ? file.created_time : file.modified_time
-    @manifest[path]["local_modified"] = File.mtime(File.join(LOCAL_ROOT, path)).to_datetime
-    write_manifest MANIFEST_PATH if IMMEDIATE_REWRITE
+    @manifest[path]["local_modified"] = File.mtime(File.join(@config['drive_path'], path)).to_datetime
+    write_manifest @config['manifest_path'] if @config['immediate_rewrite']
   end
 
   def remove_from_manifest path
     Log.log_notice "Removing file #{path} from manifest"
     @manifest[path] = nil
-    write_manifest MANIFEST_PATH if IMMEDIATE_REWRITE
+    write_manifest @config['manifest_path'] if @config['immediate_rewrite']
   end
 
 	def load_manifest path
@@ -135,7 +121,7 @@ class Synchronizer
 	def sync diff, drive, local
     #Check for updated remote or local files
     diff.both.each do |file|
-      latest_local = File.mtime(File.join(LOCAL_ROOT, file.path)).to_datetime
+      latest_local = File.mtime(File.join(@config['drive_path'], file.path)).to_datetime
       latest_remote = file.modified_time
       stored_local = DateTime.parse @manifest[file.path]["local_modified"]
       stored_remote = DateTime.parse @manifest[file.path]["remote_modified"]
@@ -159,7 +145,7 @@ class Synchronizer
         download_file file, drive
         add_to_manifest file.path, file
       #File has been deleted locally => Delete remotely or do nothing
-      elsif ALLOW_REMOTE_DELETION
+      elsif @config['allow_remote_deletion']
         delete_remote_file file, drive
         remove_from_manifest file.path
       end
@@ -196,6 +182,16 @@ class Synchronizer
     File.open(LOCK_PATH, 'w') {|file| file.write Process.pid}
   end
 
+  def load_config path
+    return unless File.file? path
+
+    @config = YAML.load_file path
+    #Allow use of tilde
+    @config['drive_path'] = File.expand_path @config['drive_path']
+    @config['manifest_path'] = File.expand_path @config['manifest_path']
+    @config['client_secret_path'] = File.expand_path @config['client_secret_path']
+  end
+
 	def run
     if check_lock
       Log.log_message "Exiting."
@@ -209,10 +205,14 @@ class Synchronizer
       return
     end
 
-    ignore_list = IgnoreList.new IGNORE_LIST_PATH
+    load_config CONFIG_PATH
+    if @config.nil?
+      Log.log_error "Could not read config file #{CONFIG_PATH}"
+      return
+    end
 
-	  drive = DriveManager.new APPLICATION_NAME, ignore_list
-	  local = LocalManager.new LOCAL_ROOT, ignore_list
+	  drive = DriveManager.new APPLICATION_NAME, @config
+	  local = LocalManager.new @config
 
 	  Log.log_notice "Getting local files..."
 	  local.get_files
@@ -221,7 +221,7 @@ class Synchronizer
 	  Log.log_notice 'Calculating diff...'
 	  diff = get_diff drive, local
 	  Log.log_message "Local folder is #{diff.remote_ahead.count} files behind and #{diff.local_ahead.count} files ahead of remote"
-	  load_manifest MANIFEST_PATH
+	  load_manifest @config['manifest_path']
 
 	  sync diff, drive, local
 

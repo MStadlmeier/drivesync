@@ -9,7 +9,6 @@ include Log
 
 OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
 SCOPE = Google::Apis::DriveV3::AUTH_DRIVE
-CLIENT_SECRETS_PATH = 'client_secret.json'
 CREDENTIALS_PATH = File.join(Dir.home, '.credentials',
                              "drivesync.yaml")
 DRIVE_FILES_TYPE = "application/vnd.google-apps"
@@ -22,7 +21,7 @@ class DriveManager
   def authorize
     FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
 
-    client_id = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
+    client_id = Google::Auth::ClientId.from_file(@config['client_secret_path'])
     token_store = Google::Auth::Stores::FileTokenStore.new(file: CREDENTIALS_PATH)
     authorizer = Google::Auth::UserAuthorizer.new(
       client_id, SCOPE, token_store)
@@ -41,12 +40,12 @@ class DriveManager
     credentials
   end
 
-  def initialize app_name, ignore_list
+  def initialize app_name, config
+    @config = config
     @service = Google::Apis::DriveV3::DriveService.new
     @service.client_options.application_name = app_name
     @service.authorization = authorize
     @folder_cache = {}
-    @ignore_list = ignore_list
   end
 
   #Loads file metadata from drive and stores them in remote_files with full paths
@@ -72,7 +71,7 @@ class DriveManager
 
     #Resolve file paths and apply ignore list
     @files.each {|file| file.path = resolve_path file}
-    @files.reject!{|file| @ignore_list.include? file.path}
+    @files.reject!{|file| file_ignored? file.path}
 
     Log.log_notice "Counted #{@files.count} remote files in #{folders.count} folders"
   end
@@ -169,5 +168,12 @@ class DriveManager
       files << folder
     end
     files.last
+  end
+
+  def file_ignored? path
+    @config['ignored_files'].each do |ign|
+      return true if ign.match path
+    end
+    false
   end
 end
