@@ -193,40 +193,45 @@ class Synchronizer
   end
 
 	def run
-    if check_lock
-      Log.log_message "Exiting."
-      return
+        if check_lock
+          Log.log_message "Exiting."
+          return
+        end
+
+        begin
+          write_lock
+        rescue
+          Log.log_error "Could not write lock file!"
+          return
+        end
+
+        begin
+    	    load_config CONFIG_PATH
+    	    if @config.nil?
+    	      Log.log_error "Could not read config file #{CONFIG_PATH}"
+    	      return
+    	    end
+
+    		  drive = DriveManager.new APPLICATION_NAME, @config
+    		  local = LocalManager.new @config
+
+    		  Log.log_notice "Getting local files..."
+    		  local.get_files
+    		  Log.log_notice "Getting remote files..."
+    		  drive.get_files
+    		  Log.log_notice 'Calculating diff...'
+    		  diff = get_diff drive, local
+    		  Log.log_message "Local folder is #{diff.remote_ahead.count} files behind and #{diff.local_ahead.count} files ahead of remote"
+    		  load_manifest @config['manifest_path']
+
+    	      Log.log_message "Starting sync at #{Time.now}"
+    		  sync diff, drive, local
+
+        rescue SystemExit, Interrupt
+            Log.log_message "Interrupted by system. Exiting gracefully..."
+        ensure
+            Log.log_message "Deleting lock file..."
+            File.delete LOCK_PATH rescue nil
+    	end
     end
-
-    begin
-      write_lock
-    rescue
-      Log.log_error "Could not write lock file!"
-      return
-    end
-
-    load_config CONFIG_PATH
-    if @config.nil?
-      Log.log_error "Could not read config file #{CONFIG_PATH}"
-      return
-    end
-
-	  drive = DriveManager.new APPLICATION_NAME, @config
-	  local = LocalManager.new @config
-
-	  Log.log_notice "Getting local files..."
-	  local.get_files
-	  Log.log_notice "Getting remote files..."
-	  drive.get_files
-	  Log.log_notice 'Calculating diff...'
-	  diff = get_diff drive, local
-	  Log.log_message "Local folder is #{diff.remote_ahead.count} files behind and #{diff.local_ahead.count} files ahead of remote"
-	  load_manifest @config['manifest_path']
-
-    Log.log_message "Starting sync at #{Time.now}"
-	  sync diff, drive, local
-
-    Log.log_notice "Deleting lock file..."
-    File.delete LOCK_PATH rescue nil
-	end
 end
