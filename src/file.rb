@@ -2,7 +2,7 @@ class Google::Apis::DriveV3::File
 	attr_accessor :path
 end
 
-#List of files that are present locally but not remotely and vice-versa
+#Keeps track of the difference between local and remote
 class FileDiff
 	#Remote ahead and both are Drive::File list
 	#Local ahead is string list

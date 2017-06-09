@@ -45,6 +45,9 @@ class DriveManager
     @service = Google::Apis::DriveV3::DriveService.new
     @service.client_options.application_name = app_name
     @service.authorization = authorize
+    @service.request_options.open_timeout_sec = 90
+    @service.request_options.timeout_sec = 90
+    @service.request_options.retries = 3
     @folder_cache = {}
   end
 
