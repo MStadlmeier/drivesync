@@ -117,7 +117,7 @@ class DriveManager
   def update local_root, file
     return if file.nil?
     #Hack : This call returns a server error for mime type plain/text. Very likely a server bug
-    content_type = file.mime_type == "text/plain" ? "text/x-c" : file.mime_type
+    content_type = file.mime_type == "text/plain" ? "application/json" : file.mime_type
     @service.update_file(file.id, content_type: content_type, upload_source: File.join(local_root, file.path))
   end
 
