@@ -27,7 +27,7 @@ This will sync your drive, downloading, uploading, updating or deleting files as
 
 This will sync every minute. Don't worry about syncing too often, there is a lock mechanism so there can never be more than one sync running at a time. You can also pipe the output of the program into a file if you want to see what it actually does.
 
-Note : If you use rvm, you may need to run `rvm cron setup` before ruby can be used in a cronjob. It may also be necessary to cd into the drivesync folder before running the script
+Note : If you use rvm, you may need to run `rvm cron setup` before ruby can be used in a cronjob
 
 **DISCLAIMER**
 

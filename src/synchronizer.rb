@@ -3,18 +3,18 @@ require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'json'
 require 'yaml'
-
 require 'fileutils'
-require './src/drive_manager'
-require './src/file'
-require './src/local_manager'
-require './src/time'
+
+require_relative './drive_manager'
+require_relative './file'
+require_relative './local_manager'
+require_relative './time'
 
 include Log
 
 APPLICATION_NAME = 'DriveSync'
 LOCK_PATH = "/tmp/drivesync.lock"
-CONFIG_PATH = "config.yml"
+CONFIG_PATH = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
 
 class Synchronizer
 
@@ -189,7 +189,7 @@ class Synchronizer
     #Allow use of tilde
     @config['drive_path'] = File.expand_path @config['drive_path']
     @config['manifest_path'] = File.expand_path @config['manifest_path']
-    @config['client_secret_path'] = File.expand_path @config['client_secret_path']
+    @config['client_secret_path'] =  File.expand_path("..", File.dirname(__FILE__)) + '/client_secret.json'
   end
 
 	def run
@@ -230,7 +230,7 @@ class Synchronizer
         rescue SystemExit, Interrupt
             Log.log_message "Interrupted by system. Exiting gracefully..."
         ensure
-            Log.log_message "Deleting lock file..."
+            Log.log_notice "Deleting lock file..."
             File.delete LOCK_PATH rescue nil
     	end
     end

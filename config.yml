@@ -1,7 +1,8 @@
-#Path for your local drive folder
-drive_path: "~/drive"
-#Path for the file which keeps track of synced files
-manifest_path: "~/.drivesync_manifest"
+#Path for your local drive folder (absolute path)
+drive_path: "~/Documents/drive"
+
+#Add a list of file paths (relative to drive root) that should not be synced. Regexes are allowed
+ignored_files: []
 
 #If true, files that have been deleted locally will also be deleted on drive
 allow_remote_deletion: true
@@ -15,8 +16,8 @@ immediate_rewrite: true
 #ignore => Does nothing and keeps both versions
 update_conflict_strategy: keep_latest
 
-#The file you generated with your client secret which is required for authentication
-client_secret_path: "client_secret.json"
+#Largest file size in megabytes that this program will handle. Anything larger than this will be ignored. Be careful about increasing this value as resumable upload has not been implemented yet
+max_file_size: 1024
 
-#Add a list of file paths (relative to drive root) that should not be synced. Regexes are allowed
-ignored_files: []
+#Path for the file which keeps track of synced files (absolute path)
+manifest_path: "~/.drivesync_manifest"
