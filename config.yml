@@ -1,23 +1,29 @@
 #Path for your local drive folder (absolute path)
 drive_path: "~/Documents/drive"
 
-#Add a list of file paths (relative to drive root) that should not be synced. Regexes are allowed
-ignored_files: []
-
 #If true, files that have been deleted locally will also be deleted on drive
+#Default: true
 allow_remote_deletion: true
-#If true, the manifest will be re-written after each file. Slows down sync but prevents problems
-immediate_rewrite: true
 
 #Determines what will be done if a file has been edited locally and remotely
-#keep_latest => Syncs whichever version has been edited last
+#keep_latest => Syncs whichever version has been edited last (default)
 #keep_remote => Downloads the remote version and overwrites local changes
 #keep_local =>  Uploads the local version and overwrites remote changes
 #ignore => Does nothing and keeps both versions
 update_conflict_strategy: keep_latest
 
-#Largest file size in megabytes that this program will handle. Anything larger than this will be ignored. Be careful about increasing this value as resumable upload has not been implemented yet
-max_file_size: 1024
+#Add a list of comma separated file paths (relative to drive root) that should not be synced. Regexes are allowed
+#Example: ignored_files: ["foo.bar", "docs/secret.file"]
+ignored_files: []
 
-#Path for the file which keeps track of synced files (absolute path)
-manifest_path: "~/.drivesync_manifest"
+#Timeout threshold for the service in seconds. If a request takes longer than this, it will be cancelled. You might want to increase this if you have to transfer large files
+#Default: 1200
+timeout: 1200
+
+#Number of times the service will retry requests
+#Default: 1
+retries: 1
+
+#Largest file size in megabytes that this program will handle. Anything larger than this will be ignored. Be careful about increasing this value as resumable upload has not been implemented yet. If you have to sync large files you may also need to increase the timeout threshold
+#Default: 512
+max_file_size: 512

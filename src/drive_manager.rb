@@ -46,15 +46,15 @@ class DriveManager
     @service = Google::Apis::DriveV3::DriveService.new
     @service.client_options.application_name = app_name
     @service.authorization = authorize
-    @service.request_options.open_timeout_sec = 90
-    @service.request_options.timeout_sec = 90
-    @service.request_options.retries = 3
+    @service.request_options.open_timeout_sec = @config['timeout']
+    @service.request_options.timeout_sec = @config['timeout']
+    @service.request_options.retries = @config['retries']
     @folder_cache = {}
   end
 
   #Loads file metadata from drive and stores them in remote_files with full paths
   def get_files
-    fields = "next_page_token, files(id, name, parents, mime_type, sharedWithMeTime, modifiedTime, createdTime)"
+    fields = "next_page_token, files(id, name, owners, parents, mime_type, sharedWithMeTime, modifiedTime, createdTime)"
 
     folders = []
     @files = []
@@ -64,8 +64,8 @@ class DriveManager
     first_page = true
     while first_page || (!next_token.nil? && !next_token.empty?)
       results = @service.list_files(q: "not trashed", fields: fields, page_token: next_token)
-      folders += results.files.select{|file| file.mime_type == DRIVE_FOLDER_TYPE and file.shared_with_me_time == nil}
-      @files += results.files.select{|file| !file.mime_type.include?(DRIVE_FILES_TYPE) and file.shared_with_me_time == nil}
+      folders += results.files.select{|file| file.mime_type == DRIVE_FOLDER_TYPE and belongs_to_me?(file)}
+      @files += results.files.select{|file| !file.mime_type.include?(DRIVE_FILES_TYPE) and belongs_to_me?(file)}
       next_token = results.next_page_token
       first_page = false
     end
@@ -179,5 +179,12 @@ class DriveManager
       return true if ign.match path
     end
     false
+  end
+
+  #Returns true if this file actually belongs to the user and is not just shared with them
+  #sharedWithMeTime is not enough to test this because files that were shared long ago don't seem to have this property
+  #so the owners have to be checked as well
+  def belongs_to_me? file
+    file.shared_with_me_time.nil? and file.owners != nil and file.owners.select{|owner| owner.me}.count > 0
   end
 end

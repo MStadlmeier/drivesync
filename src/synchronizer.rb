@@ -15,6 +15,7 @@ include Log
 APPLICATION_NAME = 'DriveSync'
 LOCK_PATH = "/tmp/drivesync.lock"
 CONFIG_PATH = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
+MANIFEST_PATH = File.expand_path "~/.drivesync_manifest"
 
 class Synchronizer
 
@@ -91,13 +92,13 @@ class Synchronizer
     @manifest[path] = {}
     @manifest[path]["remote_modified"] = file.modified_time.nil? ? file.created_time : file.modified_time
     @manifest[path]["local_modified"] = File.mtime(File.join(@config['drive_path'], path)).to_datetime
-    write_manifest @config['manifest_path'] if @config['immediate_rewrite']
+    write_manifest MANIFEST_PATH if @config['immediate_rewrite']
   end
 
   def remove_from_manifest path
     Log.log_notice "Removing file #{path} from manifest"
     @manifest[path] = nil
-    write_manifest @config['manifest_path'] if @config['immediate_rewrite']
+    write_manifest MANIFEST_PATH if @config['immediate_rewrite']
   end
 
 	def load_manifest path
@@ -188,7 +189,6 @@ class Synchronizer
     @config = YAML.load_file path
     #Allow use of tilde
     @config['drive_path'] = File.expand_path @config['drive_path']
-    @config['manifest_path'] = File.expand_path @config['manifest_path']
     @config['client_secret_path'] =  File.expand_path("..", File.dirname(__FILE__)) + '/client_secret.json'
   end
 
@@ -222,7 +222,7 @@ class Synchronizer
     		  Log.log_notice 'Calculating diff...'
     		  diff = get_diff drive, local
     		  Log.log_message "Local folder is #{diff.remote_ahead.count} files behind and #{diff.local_ahead.count} files ahead of remote"
-    		  load_manifest @config['manifest_path']
+    		  load_manifest MANIFEST_PATH
 
     	      Log.log_message "Starting sync at #{Time.now}"
     		  sync diff, drive, local
