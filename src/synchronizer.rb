@@ -92,13 +92,13 @@ class Synchronizer
     @manifest[path] = {}
     @manifest[path]["remote_modified"] = file.modified_time.nil? ? file.created_time : file.modified_time
     @manifest[path]["local_modified"] = File.mtime(File.join(@config['drive_path'], path)).to_datetime
-    write_manifest MANIFEST_PATH if @config['immediate_rewrite']
+    write_manifest MANIFEST_PATH
   end
 
   def remove_from_manifest path
     Log.log_notice "Removing file #{path} from manifest"
     @manifest[path] = nil
-    write_manifest MANIFEST_PATH if @config['immediate_rewrite']
+    write_manifest MANIFEST_PATH
   end
 
 	def load_manifest path
