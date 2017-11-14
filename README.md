@@ -19,7 +19,7 @@ bundle install
 You can then run DriveSync with `ruby drivesync.rb`
 
 ### If you do not have a Ruby installation
-Download the bundled package here : "<download link>" (Linux x86_64 package)
+[Download the bundled package here](https://github.com/MStadlmeier/drivesync/releases/tag/1.2.0) (Linux x86_64 package)
 Extract it with `tar -xzf drivesync-linux-x86_64-v_1.2.tar.gz`
 CD into the newly created folder
 You can then run DriveSync with `./drivesync`
