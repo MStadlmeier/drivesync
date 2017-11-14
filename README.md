@@ -25,7 +25,7 @@ CD into the newly created folder
 You can then run DriveSync with `./drivesync`
 
 ## Configuration
-There is a *config.yml* file containing all the software's settings. Depending on how you installed DriveSync you will find it either in **<installation folder>/config.yml** or **<installation folder>/lib/app/config.yml**
+There is a *config.yml* file containing all the software's settings. Depending on how you installed DriveSync you will find it either in **path/to/drivesync/config.yml** or **path/to/drivesync/lib/app/config.yml**
 The settings are explained in the config file. For now, the most important option is the location for the drive folder on your local system. Set it to where you would like your local drive to be.
 
 ## Automating DriveSync
