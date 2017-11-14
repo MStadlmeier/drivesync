@@ -29,6 +29,8 @@ There is a *config.yml* file containing all the software's settings. Depending o
 The settings are explained in the config file. For now, the most important option is the location for the drive folder on your local system. Set it to where you would like your local drive to be.
 
 ## Automating DriveSync
+**Make sure to run DriveSync manually at least once after you install it, as it will ask you to authenticate.**
+
 Ideally, you shouldn't have to sync your Drive manually, so let's run DriveSync periodically as a Cronjob. To do this, edit your crontab with `crontab -e` and add a Cronjob.
 
 If you are using your own Ruby installation:
