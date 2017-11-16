@@ -47,6 +47,11 @@ This will attempt to run DriveSync every minute. If DriveSync is started, but a 
 ## Large files
 Personally, I wouldn't advise automatically syncing "large" (anything in the several hundred MB range) files between platforms with this or any other software. By default, DriveSync will ignore any file above 512 MB but this can be changed in the config file. If you do this, you may have to increase the timeout threshold which can also be done in the config file.
 
+## Known Issues
+* The Google Drive filesystem allows folders or files with identical paths, while common Linux filesystems do not. I strongly advice against having multiple files with identical paths on Drive (for example a folder with two files called foo.txt).
+
+* Currently, DriveSync ignores Google Docs files (documents, presentations, spreadsheets, etc). In the future, these files might be "downloaded" as links to the corresponding files on Drive.
+
 
 ## Disclaimer
 
