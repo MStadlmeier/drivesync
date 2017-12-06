@@ -5,6 +5,7 @@ require 'fileutils'
 
 require_relative './file'
 require_relative './logger'
+require_relative './helper'
 
 include Log
 
@@ -75,7 +76,7 @@ class DriveManager
 
     #Resolve file paths and apply ignore list
     @files.each {|file| file.path = resolve_path file}
-    @files.reject!{|file| file_ignored? file.path}
+    @files.reject!{|file| Helper.file_ignored? file.path, @config}
 
     Log.log_notice "Counted #{@files.count} remote files in #{folders.count} folders"
   end
@@ -160,7 +161,7 @@ class DriveManager
 
   #Traverses the given path on drive, creates any missing folders and returns the last folder in the path
   def traverse_and_create path
-    root = @folder_cache.values.select{|file| file.name == ROOT_FOLDER and file.parents.nil?}.first
+    root = @folder_cache.values.find{|file| file.name == ROOT_FOLDER and file.parents.nil?}
 
     #DriveV3::File (actually folders)
     files = [root]
@@ -172,13 +173,6 @@ class DriveManager
       files << folder
     end
     files.last
-  end
-
-  def file_ignored? path
-    @config['ignored_files'].each do |ign|
-      return true if ign.match path
-    end
-    false
   end
 
   #Returns true if this file actually belongs to the user and is not just shared with them

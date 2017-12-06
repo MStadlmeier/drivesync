@@ -9,13 +9,15 @@ require_relative './drive_manager'
 require_relative './file'
 require_relative './local_manager'
 require_relative './time'
+require_relative './helper'
 
 include Log
 
 APPLICATION_NAME = 'DriveSync'
 LOCK_PATH = "/tmp/drivesync.lock"
 CONFIG_PATH = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
-MANIFEST_PATH = File.expand_path "~/.drivesync_manifest"
+MANIFEST_PATH = File.expand_path "~/.drivesync/manifest"
+MANIFEST_PATH_OLD = File.expand_path "~/.drivesync_manifest"
 
 class Synchronizer
 
@@ -101,15 +103,26 @@ class Synchronizer
     write_manifest MANIFEST_PATH
   end
 
-	def load_manifest path
-	  if !File.file? path
-	    Log.log_notice 'Manifest not found. Creating...'
-	    File.open(path, 'w') do |file|
-	     file.puts '{}'
+	def load_manifest
+	  if !File.file? MANIFEST_PATH
+      if File.file? MANIFEST_PATH_OLD
+        FileUtils.cp MANIFEST_PATH_OLD, MANIFEST_PATH
+        FileUtils.rm MANIFEST_PATH_OLD
+        @manifest = JSON.parse(File.read MANIFEST_PATH)
+      else
+  	    Log.log_notice 'Manifest not found. Creating...'
+  	    File.open(MANIFEST_PATH, 'w') do |file|
+  	     file.puts '{}'
+        end
+  	    @manifest = {}
       end
-	    @manifest = {}
     else
-	    @manifest = JSON.parse(File.read path)
+	    @manifest = JSON.parse(File.read MANIFEST_PATH)
+    end
+
+    #Remove ignored files from manifest
+    @manifest.keys.each do |path|
+      @manifest.delete path if Helper.file_ignored? path, @config
     end
 	end
 
@@ -206,11 +219,8 @@ class Synchronizer
         end
 
         begin
-    	    load_config CONFIG_PATH
-    	    if @config.nil?
-    	      Log.log_error "Could not read config file #{CONFIG_PATH}"
-    	      return
-    	    end
+    	    config_manager = ConfigManager.new
+          @config = config_manager.config
 
     		  drive = DriveManager.new APPLICATION_NAME, @config
     		  local = LocalManager.new @config
@@ -222,9 +232,9 @@ class Synchronizer
     		  Log.log_notice 'Calculating diff...'
     		  diff = get_diff drive, local
     		  Log.log_message "Local folder is #{diff.remote_ahead.count} files behind and #{diff.local_ahead.count} files ahead of remote"
-    		  load_manifest MANIFEST_PATH
+    		  load_manifest
 
-    	      Log.log_message "Starting sync at #{Time.now}"
+    	    Log.log_message "Starting sync at #{Time.now}"
     		  sync diff, drive, local
 
         rescue SystemExit, Interrupt

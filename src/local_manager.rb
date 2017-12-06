@@ -1,5 +1,6 @@
 include Log
 require 'fileutils'
+require_relative './helper'
 
 class LocalManager
   attr_accessor :files
@@ -14,7 +15,7 @@ class LocalManager
   def get_files
     @files = Dir[File.join(@root, '**', '*')].reject{|f| File.directory?(f)}
     @files = @files.collect{|file| file.sub @root, ''}
-    @files = @files.reject{|f| file_ignored?(f) || too_large?(f)}
+    @files = @files.reject{|f| Helper.file_ignored?(f, @config) || too_large?(f)}
   end
 
   #For consistency's sake..
@@ -25,13 +26,6 @@ class LocalManager
   end
 
   private
-
-  def file_ignored? path
-    @config['ignored_files'].each do |ign|
-      return true if ign.match path
-    end
-    false
-  end
 
   def too_large? path
     return false if @config['max_file_size'].nil?

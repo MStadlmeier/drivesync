@@ -3,7 +3,7 @@ drive_path: "~/Documents/drive"
 
 #If true, files that have been deleted locally will also be deleted on drive
 #Default: true
-allow_remote_deletion: true
+allow_remote_deletion: false
 
 #Determines what will be done if a file has been edited locally and remotely
 #keep_latest => Syncs whichever version has been edited last (default)
@@ -12,9 +12,6 @@ allow_remote_deletion: true
 #ignore => Does nothing and keeps both versions
 update_conflict_strategy: keep_latest
 
-#Add a list of comma separated file paths (relative to drive root) that should not be synced. Regexes are allowed
-#Example: ignored_files: ["foo.bar", "docs/secret.file"]
-ignored_files: []
 
 #Timeout threshold for the service in seconds. If a request takes longer than this, it will be cancelled. You might want to increase this if you have to transfer large files
 #Default: 1200
@@ -27,3 +24,16 @@ retries: 1
 #Largest file size in megabytes that this program will handle. Anything larger than this will be ignored. Be careful about increasing this value as resumable upload has not been implemented yet. If you have to sync large files you may also need to increase the timeout threshold
 #Default: 512
 max_file_size: 512
+#Determines which files will be synced.
+#blacklist => Every file except those included in 'ignored_files' below will be syced (default)
+#whitelist => Only files included in 'whitelist' will be synced
+inclusion: blacklist
+
+#White and blacklist contain file paths relative to Drive root. Which will (whitelist) / won't (blacklist) be synced.
+#Globs [https://en.wikipedia.org/wiki/Glob_(programming)] are allowed
+#Examples: blacklist: ["foo.bar","secret_*.txt","hidden/docs/*"] / whitelist: ["sync/*", "logs.tar.gz"]
+
+blacklist: []
+whitelist: []
+
+config_version: 1.1
