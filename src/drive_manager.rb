@@ -176,7 +176,8 @@ class DriveManager
 
   def file_ignored? path
     @config['ignored_files'].each do |ign|
-      return true if ign.match path
+      regex = Regexp.new(ign)
+      return true if regex.match path
     end
     false
   end
