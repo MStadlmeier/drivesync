@@ -9,22 +9,24 @@ require_relative './helper'
 
 include Log
 
-OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
-SCOPE = Google::Apis::DriveV3::AUTH_DRIVE
-CREDENTIALS_PATH = File.join(Dir.home, '.credentials',
-                             "drivesync.yaml")
-DRIVE_FILES_TYPE = "application/vnd.google-apps"
-DRIVE_FOLDER_TYPE = "application/vnd.google-apps.folder"
-ROOT_FOLDER = "My Drive"
-
 class DriveManager
+  OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
+  SCOPE = Google::Apis::DriveV3::AUTH_DRIVE
+  CREDENTIALS_PATH = File.join(Dir.home, '.credentials',
+                               "drivesync.yaml")
+  DRIVE_FILES_TYPE = "application/vnd.google-apps"
+  DRIVE_FOLDER_TYPE = "application/vnd.google-apps.folder"
+  ROOT_FOLDER = "My Drive"
+
   attr_accessor :files
+  attr_reader :credentials_path
 
   def authorize
     FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
 
+    credentials_path = CREDENTIALS_PATH
     client_id = Google::Auth::ClientId.from_file(@config['client_secret_path'])
-    token_store = Google::Auth::Stores::FileTokenStore.new(file: CREDENTIALS_PATH)
+    token_store = Google::Auth::Stores::FileTokenStore.new(file: credentials_path)
     authorizer = Google::Auth::UserAuthorizer.new(
       client_id, SCOPE, token_store)
     user_id = 'default'

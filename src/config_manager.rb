@@ -1,7 +1,6 @@
 class ConfigManager
   require 'fileutils'
   require 'yaml'
-  require 'byebug'
 
   CONFIG_PATH = File.expand_path('~/.drivesync/config.yml')
   CONFIG_PATH_OLD = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
@@ -20,7 +19,7 @@ class ConfigManager
       puts "UPGRADE NOTICE: The location of the config file has been moved to #{CONFIG_PATH}. Your previous config has been moved there"
       FileUtils.rm CONFIG_PATH_OLD
     elsif !File.file? CONFIG_PATH
-      Log.log_warning "Could not find config file at #{CONFIG_PATH} . Creating default config..."
+      Log.log_message "Warning: Could not find config file at #{CONFIG_PATH} . Creating default config..."
       write_default
     end
 
