@@ -1,15 +1,32 @@
 require_relative 'src/synchronizer'
 require_relative 'src/config_manager'
+require 'open-uri'
 
-VERSION = 1.3
+VERSION = '1.3.0'
+CHANGELOG_URL = 'https://raw.githubusercontent.com/MStadlmeier/drivesync/master/CHANGELOG'
+
+def check_for_update
+  #Not at all hacky way of checking for updates
+  begin
+    changelog = open(CHANGELOG_URL).read
+    version = changelog.split("\n").first.split(' ')[1].strip
+    if version != VERSION
+      puts "New version available - latest version is: #{version}"
+      puts "Get the latest version by running 'git pull' in DriveSync folder or by going to the project website (https://github.com/MStadlmeier/drivesync) and downloading the latest version"
+    end
+  rescue StandardError
+  end
+end
 
 def sync
   syncer = Synchronizer.new
   syncer.run
+  check_for_update
 end
 
 def print_version
   puts "DriveSync v#{VERSION}"
+  check_for_update
 end
 
 def print_help
@@ -25,6 +42,7 @@ def print_help
 end
 
 def reset
+  check_for_update
   syncer = Synchronizer.new
   syncer.reset
 end

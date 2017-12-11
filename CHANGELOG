@@ -1,0 +1,5 @@
+VERSION 1.3.0
+-Enabled whitelisting as an alternative to blacklisting
+-Moved config and manifest files into ~/.drivesync/ (Warning: If you use the bundled package and update to this version, you will need to move your config.yml file there yourself)
+-Added command line options version, help and reset
+-Various minor fixes, mostly about error handling for missing manifest entries
