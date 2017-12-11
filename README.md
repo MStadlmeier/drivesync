@@ -28,10 +28,12 @@ You can then run DriveSync with `./drivesync`
 The easiest way to get the latest version is by going in the directory that contains drivesync.rb and running `git pull` . You can also simply download the latest version from this site. DriveSync checks for updates whenever it starts and notifies you if there is a new version. However, users that automate DriveSync may not see this notice, so I suggest checking this site occasionally or running `ruby drivesync.rb -v` to check for updates.
 
 ## Configuration
-There is a *config.yml* file containing all the software's settings. Depending on how you installed DriveSync you will find it either in **<installation folder>/config.yml** or **<installation folder>/lib/app/config.yml**
+There is a *config.yml* file containing all the software's settings. Depending on how you installed DriveSync you will find it either in **path/to/drivesync/config.yml** or **path/to/drivesync/lib/app/config.yml**
 The settings are explained in the config file. For now, the most important option is the location for the drive folder on your local system. Set it to where you would like your local drive to be.
 
 ## Automating DriveSync
+**Make sure to run DriveSync manually at least once after you install it, as it will ask you to authenticate.**
+
 Ideally, you shouldn't have to sync your Drive manually, so let's run DriveSync periodically as a Cronjob. To do this, edit your crontab with `crontab -e` and add a Cronjob.
 
 If you are using your own Ruby installation:
@@ -50,6 +52,11 @@ Personally, I wouldn't advise automatically syncing "large" (anything in the sev
 
 ## Troubleshooting
 If you encounter any difficulties, feel free to open an issue here and I'll get to you as soon as possible. Alternatively, running `ruby drivesync.rb reset` will reset your installation and clear your local drive folder, which might also help.
+
+## Known Issues
+* The Google Drive filesystem allows folders or files with identical paths, while common Linux filesystems do not. I strongly advice against having multiple files with identical paths on Drive (for example a folder with two files called foo.txt).
+
+* Currently, DriveSync ignores Google Docs files (documents, presentations, spreadsheets, etc). In the future, these files might be "downloaded" as links to the corresponding files on Drive.
 
 
 ## Disclaimer
