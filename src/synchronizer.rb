@@ -24,13 +24,13 @@ class Synchronizer
   def initialize
     if check_lock
       Log.log_message "Exiting."
-      return
+      exit 1
     end
     begin
       write_lock
     rescue
       Log.log_error "Could not write lock file!"
-      return
+       exit 1
     end
 
     config_manager = ConfigManager.new
@@ -68,12 +68,16 @@ class Synchronizer
     input = STDIN.getch
     unless input.downcase == 'y'
       puts "Cancelled"
+      File.delete LOCK_PATH rescue nil
       return
     end
 
-    paths = [@config['drive_path'], MANIFEST_PATH, @drive.credentials_path]
+    paths = [@config['drive_path'], MANIFEST_PATH, MANIFEST_PATH_OLD, @drive.credentials_path]
     paths.each do |path|
-      FileUtils.rm_r path if Helper::safe_path? path
+      begin
+        FileUtils.rm_r path if Helper::safe_path? path
+      rescue Errno::ENOENT
+      end
     end
     puts "Reset complete"
     File.delete LOCK_PATH rescue nil

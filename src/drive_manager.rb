@@ -24,7 +24,7 @@ class DriveManager
   def authorize
     FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
 
-    credentials_path = CREDENTIALS_PATH
+    @credentials_path = CREDENTIALS_PATH
     client_id = Google::Auth::ClientId.from_file(@config['client_secret_path'])
     token_store = Google::Auth::Stores::FileTokenStore.new(file: credentials_path)
     authorizer = Google::Auth::UserAuthorizer.new(
