@@ -5,7 +5,7 @@ class ConfigManager
   CONFIG_PATH = File.expand_path('~/.drivesync/config.yml')
   CONFIG_PATH_OLD = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
   DEFAULT_CONFIG_PATH = File.dirname(__FILE__) + '/defaultconfig'
-  CONFIG_VERSION = 1.1
+  CONFIG_VERSION = 1.2
 
   attr_accessor :config
 
@@ -52,11 +52,19 @@ class ConfigManager
     if @config['whitelist'].nil?
       added_lines << "#White and blacklist contain file paths relative to Drive root. Which will (whitelist) / won't (blacklist) be synced.\n#Globs [https://en.wikipedia.org/wiki/Glob_(programming)] are allowed\n#Examples: blacklist: [\"foo.bar\",\"secret_*.txt\",\"hidden/docs/*\"] / whitelist: [\"sync/*\", \"logs.tar.gz\"]\n\nblacklist: [#{blacklist_contents}]\nwhitelist: []\n"
     end
-    added_lines << "config_version: #{CONFIG_VERSION}"
     removed_lines << 'config_version:'
-    removed_lines << '#Add a list of comma separated file paths (relative to drive root) that should not be synced'
-    removed_lines << '#Example: ignored_files:'
-    removed_lines << 'ignored_files:'
+    if @config['ignored_files'] != nil
+      removed_lines << '#Add a list of comma separated file paths (relative to drive root) that should not be synced'
+      removed_lines << '#Example: ignored_files:'
+      removed_lines << 'ignored_files:'
+    end
+
+    if @config['sync_shared_in_drive'].nil?
+      added_lines << "#If true, files that have been shared with you will be synced as well, as long as you added them to your Drive\n#Default: false\nsync_shared_in_drive: false"
+    end
+
+    added_lines << "config_version: #{CONFIG_VERSION}"
+
     config_lines = File.read(CONFIG_PATH).split("\n")
 
     File.open(CONFIG_PATH, 'w') do |file|

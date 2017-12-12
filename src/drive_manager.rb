@@ -181,6 +181,9 @@ class DriveManager
   #sharedWithMeTime is not enough to test this because files that were shared long ago don't seem to have this property
   #so the owners have to be checked as well
   def belongs_to_me? file
+    #The only difference between shared files that have been added to your Drive
+    #and those that haven't is that those that have have a file path (parents)
+    return true if @config['sync_shared_in_drive'] and file.parents != nil and file.parents != []
     file.shared_with_me_time.nil? and file.owners != nil and file.owners.select{|owner| owner.me}.count > 0
   end
 end

@@ -36,4 +36,8 @@ inclusion: blacklist
 blacklist: []
 whitelist: []
 
-config_version: 1.1
+#If true, files that have been shared with you will be synced as well, as long as you added them to your Drive
+#Default: false
+sync_shared_in_drive: false
+
+config_version: 1.2
