@@ -3,7 +3,7 @@ drive_path: "~/Documents/drive"
 
 #If true, files that have been deleted locally will also be deleted on drive
 #Default: true
-allow_remote_deletion: false
+allow_remote_deletion: true
 
 #Determines what will be done if a file has been edited locally and remotely
 #keep_latest => Syncs whichever version has been edited last (default)
