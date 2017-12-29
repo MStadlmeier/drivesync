@@ -1,3 +1,8 @@
+VERSION 1.3.1
+-Improved critical error handling for moved local drive folder
+-Support for syncing shared files that have been added to your Drive (new config option: 'sync_shared_in_drive')
+-Command line argument 'config' that opens config file in default text editor
+
 VERSION 1.3.0
 -Enabled whitelisting as an alternative to blacklisting
 -Blacklists and whitelists now use Globs ('*.doc', 'secret/*', etc) not regex

@@ -36,15 +36,20 @@ def print_help
   puts "Config location: #{File.expand_path('~/.drivesync/config.yml')}"
   puts "Usage:"
   puts "  sync / no parameter - Start sync"
-  puts "  help / -h - Display this message"
-  puts "  -v / version - Display software version"
+  puts "  config / -c - Opens the config file in your default text editor"
   puts "  reset - Deletes local Drive folder, manifest and authorization, resetting your install (this should fix any sync problems)"
+  puts "  -v / version - Display software version"
+  puts "  help / -h - Display this message"
 end
 
 def reset
   check_for_update
   syncer = Synchronizer.new
   syncer.reset
+end
+
+def config
+  system("\"${EDITOR:-vi}\" #{File.expand_path('~/.drivesync/config.yml')}")
 end
 
 arg = ARGV.length == 0 ? 'sync' : ARGV.first
@@ -57,6 +62,8 @@ when 'version', '-v', '-version'
   print_version
 when 'reset'
   reset
+when 'config', '-c'
+  config
 else
   puts "Unrecognized parameter: '#{arg}' - try -h for usage instructions"
 end
