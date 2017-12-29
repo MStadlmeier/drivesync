@@ -17,7 +17,6 @@ include Log
 class Synchronizer
   APPLICATION_NAME = 'DriveSync'
   LOCK_PATH = "/tmp/drivesync.lock"
-  CONFIG_PATH = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
   MANIFEST_PATH = File.expand_path "~/.drivesync/manifest"
   MANIFEST_PATH_OLD = File.expand_path "~/.drivesync_manifest"
 
@@ -37,10 +36,33 @@ class Synchronizer
     @config = config_manager.config
     @drive = DriveManager.new APPLICATION_NAME, @config
     @local = LocalManager.new @config
+
+    #If local Drive path doesn't exist even though there has been a previous sync (manifest exists), drive has likely moved locally and a forced sync might delete entire remote Drive
+    if !File.exist?(@config['drive_path']) and (File.exist?(MANIFEST_PATH) or File.exist?(MANIFEST_PATH_OLD))
+      Log.log_error("Could not find your local drive folder at #{@config['drive_path']} although there has been a previous sync. Please make sure that the drive path specified in the config file (found at #{ConfigManager::CONFIG_PATH}) is correct.\n\nHow do you want to procede (cancel/reset/force)?\n'cancel' - Stop the sync, giving you a chance to check your configuration and drive folder\n'reset' - Starts a fresh sync with the new local drive folder\n'force' - Forces the sync to proceede. WARNING: This will delete any previously synced files on your Google Drive because they will be considered locally deleted (unless remote deletion isn't enabled in your config).")
+      answer = STDIN.gets.chomp
+      case answer.strip.downcase
+      when 'reset'
+        puts "Deleting manifest and performing fresh sync..."
+        FileUtils.rm MANIFEST_PATH if File.exist?(MANIFEST_PATH)
+        FileUtils.rm MANIFEST_PATH_OLD if File.exist?(MANIFEST_PATH_OLD)
+      when 'force'
+        puts "WARNING: Forcing sync with empty local Drive folder #{@config['drive_path']}"
+      when 'cancel'
+        puts 'Cancelling sync'
+        File.delete LOCK_PATH rescue nil
+        exit 1
+      else
+        puts 'Invalid input. Cancelling sync'
+        File.delete LOCK_PATH rescue nil
+        exit 1
+      end
+    end
   end
 
   def run
     begin
+      FileUtils.mkdir_p @config['drive_path']
       Log.log_notice "Getting local files..."
       @local.get_files
       Log.log_notice "Getting remote files..."

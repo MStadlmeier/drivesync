@@ -9,7 +9,6 @@ class LocalManager
     @root = config['drive_path']
     @root += '/' if @root[-1] != '/'
     @config = config
-    FileUtils.mkdir_p @root
   end
 
   def get_files
