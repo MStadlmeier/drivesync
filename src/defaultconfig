@@ -25,7 +25,7 @@ retries: 1
 #Default: 512
 max_file_size: 512
 #Determines which files will be synced.
-#blacklist => Every file except those included in 'ignored_files' below will be syced (default)
+#blacklist => Every file except those included in 'blacklist' below will be syced (default)
 #whitelist => Only files included in 'whitelist' will be synced
 inclusion: blacklist
 
