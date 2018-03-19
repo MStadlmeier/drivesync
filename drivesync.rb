@@ -2,7 +2,7 @@ require_relative 'src/synchronizer'
 require_relative 'src/config_manager'
 require 'open-uri'
 
-VERSION = '1.3.2'
+VERSION = '1.3.3'
 CHANGELOG_URL = 'https://raw.githubusercontent.com/MStadlmeier/drivesync/master/CHANGELOG'
 
 def check_for_update

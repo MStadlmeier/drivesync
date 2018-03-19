@@ -157,7 +157,7 @@ class DriveManager
     folder.parents = [parent.id] unless parent.nil?
     folder.name = name
     Log.log_notice "Creating folder #{folder.name} ..."
-    result = @service.create_file folder
+    result = @service.create_file folder, fields: "id, name, owners, parents, mime_type, sharedWithMeTime, modifiedTime, createdTime"
     @folder_cache[result.id] = result
   end
 

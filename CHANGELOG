@@ -1,3 +1,6 @@
+VERSION 1.3.3
+-Fixed bug that would cause the first sync after creating a new folder with multiple files to crash
+
 VERSION 1.3.2
 -Removed pre-packaged support due to Travelling Ruby not being maintained anymore
 -Fixed minor input bug

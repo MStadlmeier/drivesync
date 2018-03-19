@@ -51,6 +51,8 @@ If you encounter any difficulties, feel free to open an issue here and I'll get 
 
 * Currently, DriveSync ignores Google Docs files (documents, presentations, spreadsheets, etc). In the future, these files might be "downloaded" as links to the corresponding files on Drive.
 
+* Folders are not deleted remotely if they are deleted locally. The contents will be deleted, however.
+
 
 ## Disclaimer
 Neither I nor this software are in any way affiliated with Google. Although I tested this software very thoroughly and have been using it myself for over a year without any loss of data, you agree to use DriveSync at your own risk and I am not responsible for any damages that may occur.
