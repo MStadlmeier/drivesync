@@ -1,3 +1,4 @@
+require 'bundler/setup'
 require_relative 'src/synchronizer'
 require_relative 'src/config_manager'
 require 'open-uri'
