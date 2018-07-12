@@ -13,7 +13,9 @@ allow_remote_deletion: true
 update_conflict_strategy: keep_latest
 
 
-#Timeout threshold for the service in seconds. If a request takes longer than this, it will be cancelled. You might want to increase this if you have to transfer large files
+#Timeout threshold for the service in seconds. If a request takes longer
+#than this, it will be cancelled. You might want to increase this if you
+#have to transfer large files
 #Default: 1200
 timeout: 1200
 
@@ -21,22 +23,28 @@ timeout: 1200
 #Default: 1
 retries: 1
 
-#Largest file size in megabytes that this program will handle. Anything larger than this will be ignored. Be careful about increasing this value as resumable upload has not been implemented yet. If you have to sync large files you may also need to increase the timeout threshold
+#Largest file size in megabytes that this program will handle. Anything 
+#larger than this will be ignored. Be careful about increasing this value
+#as resumable upload has not been implemented yet. If you have to sync 
+#large files you may also need to increase the timeout threshold
 #Default: 512
 max_file_size: 512
 #Determines which files will be synced.
-#blacklist => Every file except those included in 'blacklist' below will be syced (default)
+#blacklist => Every file except those included in 'blacklist' below will
+#be syced (default)
 #whitelist => Only files included in 'whitelist' will be synced
 inclusion: blacklist
 
-#White and blacklist contain file paths relative to Drive root. Which will (whitelist) / won't (blacklist) be synced.
+#White and blacklist contain file paths relative to Drive root. Which will
+#(whitelist) / won't (blacklist) be synced.
 #Globs [https://en.wikipedia.org/wiki/Glob_(programming)] are allowed
 #Examples: blacklist: ["foo.bar","secret_*.txt","hidden/docs/*"] / whitelist: ["sync/*", "logs.tar.gz"]
 
 blacklist: []
 whitelist: []
 
-#If true, files that have been shared with you will be synced as well, as long as you added them to your Drive
+#If true, files that have been shared with you will be synced as well, 
+#as long as you added them to your Drive
 #Default: false
 sync_shared_in_drive: false
 
