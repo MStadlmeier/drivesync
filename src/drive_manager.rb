@@ -51,6 +51,7 @@ class DriveManager
     @service.authorization = authorize
     @service.client_options.open_timeout_sec = @config['timeout']
     @service.client_options.read_timeout_sec = @config['timeout']
+    @service.client_options.send_timeout_sec = @config['timeout']
     @service.request_options.retries = @config['retries']
     @folder_cache = {}
   end
