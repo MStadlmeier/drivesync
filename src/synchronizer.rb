@@ -16,7 +16,8 @@ include Log
 
 class Synchronizer
   APPLICATION_NAME = 'DriveSync'
-  LOCK_PATH = "/tmp/drivesync.lock"
+  USER_NAME=ENV['USER']
+  LOCK_PATH = "/tmp/#{USER_NAME}-drivesync.lock"
   MANIFEST_PATH = File.expand_path "~/.drivesync/manifest"
   MANIFEST_PATH_OLD = File.expand_path "~/.drivesync_manifest"
 
@@ -276,8 +277,13 @@ class Synchronizer
   def check_lock
     if File.file? LOCK_PATH
       pid = File.read LOCK_PATH
-      Log.log_message "There is already a sync in progress! - PID : #{pid}"
-      true
+      pid_exists = system( "kill -0 #{pid} 2>&1 > /dev/null" )
+      if pid_exists
+         false
+      else
+         Log.log_message "There is already a sync in progress! - PID : #{pid}"
+         true
+      end
     else
       false
     end
