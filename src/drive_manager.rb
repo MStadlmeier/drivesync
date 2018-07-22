@@ -49,10 +49,16 @@ class DriveManager
     @service = Google::Apis::DriveV3::DriveService.new
     @service.client_options.application_name = app_name
     @service.authorization = authorize
-    @service.client_options.open_timeout_sec = @config['timeout']
-    @service.client_options.read_timeout_sec = @config['timeout']
-    @service.client_options.send_timeout_sec = @config['timeout']
-    @service.request_options.retries = @config['retries']
+    begin
+      @service.client_options.open_timeout_sec = @config['timeout']
+      @service.client_options.read_timeout_sec = @config['timeout']
+      @service.client_options.send_timeout_sec = @config['timeout']
+      @service.request_options.retries = @config['retries']
+    rescue NoMethodError => e
+      puts e.message
+      Log.log_error "Error configuring drive service. Make sure your dependencies are up-to-date by running 'bundle install' in the drivesync directory"
+      exit 1
+    end
     @folder_cache = {}
   end
 
