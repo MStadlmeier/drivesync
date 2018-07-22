@@ -51,11 +51,11 @@ class Synchronizer
         puts "WARNING: Forcing sync with empty local Drive folder #{@config['drive_path']}"
       when 'cancel'
         puts 'Cancelling sync'
-        File.delete LOCK_PATH rescue nil
+        delete_lock
         exit 1
       else
         puts 'Invalid input. Cancelling sync'
-        File.delete LOCK_PATH rescue nil
+        delete_lock
         exit 1
       end
     end
@@ -79,7 +79,7 @@ class Synchronizer
       Log.log_message "Interrupted by system. Exiting gracefully..."
     ensure
       Log.log_notice "Deleting lock file..."
-      File.delete LOCK_PATH rescue nil
+      delete_lock
     end
   end
 
@@ -91,7 +91,7 @@ class Synchronizer
     input = STDIN.getch
     unless input.downcase == 'y'
       puts "Cancelled"
-      File.delete LOCK_PATH rescue nil
+      delete_lock
       return
     end
 
@@ -103,7 +103,7 @@ class Synchronizer
       end
     end
     puts "Reset complete"
-    File.delete LOCK_PATH rescue nil
+    delete_lock
   end
 
   private
@@ -277,12 +277,15 @@ class Synchronizer
   def check_lock
     if File.file? LOCK_PATH
       pid = File.read LOCK_PATH
-      pid_exists = system( "kill -0 #{pid} 2>&1 > /dev/null" )
-      if pid_exists
-         false
-      else
-         Log.log_message "There is already a sync in progress! - PID : #{pid}"
-         true
+      #Check if process actually exists or if lock was left accidentally
+      begin
+        Process.kill(0, pid.to_i)
+        Log.log_message "There is already a sync in progress! - PID : #{pid}"
+        return true
+      rescue Errno::ESRCH => e
+        delete_lock
+        return false
+
       end
     else
       false
@@ -292,6 +295,10 @@ class Synchronizer
   def write_lock
     Log.log_notice "Writing lock file #{LOCK_PATH} ..."
     File.open(LOCK_PATH, 'w') {|file| file.write Process.pid}
+  end
+
+  def delete_lock
+    File.delete LOCK_PATH rescue nil
   end
 
   def load_config path
