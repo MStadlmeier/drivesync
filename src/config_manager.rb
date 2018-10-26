@@ -5,7 +5,7 @@ class ConfigManager
   CONFIG_PATH = File.expand_path('~/.drivesync/config.yml')
   CONFIG_PATH_OLD = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
   DEFAULT_CONFIG_PATH = File.dirname(__FILE__) + '/defaultconfig'
-  CONFIG_VERSION = 1.2
+  CONFIG_VERSION = 1.3
 
   attr_accessor :config
 
@@ -61,6 +61,10 @@ class ConfigManager
 
     if @config['sync_shared_in_drive'].nil?
       added_lines << "#If true, files that have been shared with you will be synced as well, as long as you added them to your Drive\n#Default: false\nsync_shared_in_drive: false"
+    end
+
+    if @config['follow_symlinks'].nil?
+      added_lines << "#If true, symlinks inside your local drive folder will be followed\n#Default: false\nfollow_symlinks: false\n"
     end
 
     added_lines << "config_version: #{CONFIG_VERSION}"
