@@ -24,6 +24,11 @@ def sync
   check_for_update
 end
 
+def diff
+  syncer = Synchronizer.new
+  syncer.print_diff
+end
+
 def print_version
   puts "DriveSync v#{VERSION}"
   check_for_update
@@ -56,6 +61,8 @@ arg = ARGV.length == 0 ? 'sync' : ARGV.first
 case arg.downcase
 when 'sync'
   sync
+when 'diff'
+  diff
 when 'help', '-h', '-help'
   print_help
 when 'version', '-v', '-version'
