@@ -14,7 +14,7 @@ Please note that the pre-packaged version has been removed because Travelling Ru
 When Ruby is installed, get drivesync:
 
 ````
-git clone git@github.com:MStadlmeier/drivesync.git
+git clone git@github.com/MStadlmeier/drivesync.git
 cd drivesync
 bundle install
 ````
