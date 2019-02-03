@@ -90,7 +90,7 @@ class Synchronizer
   def print_diff
     begin
       get_files
-
+      Log.log_message "Local folder is #{@diff.remote_ahead.count} files behind and #{@diff.local_ahead.count} files ahead of remote"
       puts "Local Ahead:"
       @diff.local_ahead.each do |f| puts "#{f}" end
       puts ""
