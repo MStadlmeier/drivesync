@@ -63,13 +63,7 @@ class Synchronizer
 
   def run
     begin
-      FileUtils.mkdir_p @config['drive_path']
-      Log.log_notice "Getting local files..."
-      @local.get_files
-      Log.log_notice "Getting remote files..."
-      @drive.get_files
-      Log.log_notice 'Calculating diff...'
-      @diff = get_diff
+      get_files
       Log.log_message "Local folder is #{@diff.remote_ahead.count} files behind and #{@diff.local_ahead.count} files ahead of remote"
       load_manifest
 
@@ -77,6 +71,31 @@ class Synchronizer
       sync
     rescue SystemExit, Interrupt
       Log.log_message "Interrupted by system. Exiting gracefully..."
+    ensure
+      Log.log_notice "Deleting lock file..."
+      File.delete LOCK_PATH rescue nil
+    end
+  end
+
+  def get_files
+      FileUtils.mkdir_p @config['drive_path']
+      Log.log_notice "Getting local files..."
+      @local.get_files
+      Log.log_notice "Getting remote files..."
+      @drive.get_files
+      Log.log_notice 'Calculating diff...'
+      @diff = get_diff
+  end
+
+  def print_diff
+    begin
+      get_files
+      Log.log_message "Local folder is #{@diff.remote_ahead.count} files behind and #{@diff.local_ahead.count} files ahead of remote"
+      puts "Local Ahead:"
+      @diff.local_ahead.each do |f| puts "#{f}" end
+      puts ""
+      puts "Remote Ahead:"
+      @diff.remote_ahead.each do |f| puts "#{f.path}" end
     ensure
       Log.log_notice "Deleting lock file..."
       delete_lock
@@ -106,23 +125,22 @@ class Synchronizer
     delete_lock
   end
 
-  private
-	def get_diff
-	  diff = FileDiff.new
-	  @drive.files.each do |file|
+  private def get_diff
+    diff = FileDiff.new
+    @drive.files.each do |file|
       if @local.find_by_path file.path
         diff.both << file
       else
-	     diff.remote_ahead << file
-     end
-	  end
+        diff.remote_ahead << file
+      end
+    end
 
-	  @local.files.each do |file|
-	    diff.local_ahead << file unless @drive.find_by_path file
-	  end
+    @local.files.each do |file|
+      diff.local_ahead << file unless @drive.find_by_path file
+    end
 
-	  diff
-	end
+    diff
+  end
 
   def download_file file, drive, update = false
     Log.log_message "#{update ? 'Updating' : 'Downloading'} file #{file.path} ..."
