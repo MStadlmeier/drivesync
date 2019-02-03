@@ -2,7 +2,7 @@ require_relative 'src/synchronizer'
 require_relative 'src/config_manager'
 require 'open-uri'
 
-VERSION = '1.3.3'
+VERSION = '1.4.0'
 CHANGELOG_URL = 'https://raw.githubusercontent.com/MStadlmeier/drivesync/master/CHANGELOG'
 
 def check_for_update
@@ -42,6 +42,7 @@ def print_help
   puts "Usage:"
   puts "  sync / no parameter - Start sync"
   puts "  config / -c - Opens the config file in your default text editor"
+  puts "  diff - Prints a diff without syncing anything"
   puts "  reset - Deletes local Drive folder, manifest and authorization, resetting your install (this should fix any sync problems)"
   puts "  -v / version - Display software version"
   puts "  help / -h - Display this message"
