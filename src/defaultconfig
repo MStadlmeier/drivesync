@@ -48,4 +48,8 @@ whitelist: []
 #Default: false
 sync_shared_in_drive: false
 
-config_version: 1.2
+#If true, symlinks inside your local drive folder will be followed
+#Default: false
+follow_symlinks: false
+
+config_version: 1.3

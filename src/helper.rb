@@ -23,4 +23,19 @@ class Helper
     return false if path == Dir.home + '/'
     true
   end
+
+  #Dir.glob replacement with follow_symlinks support
+  def self.dir_glob pattern, follow_symlinks = false, flags = 0
+    files = Array.new
+
+    Dir.glob(pattern).each do |file|
+      files.push(file)
+
+      if follow_symlinks && File.symlink?(file) && File.directory?(file)
+        files.push(dir_glob(File.join(file, '**', '*'), follow_symlinks, flags))
+      end
+    end
+
+    return files.flatten
+  end
 end

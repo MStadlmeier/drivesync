@@ -12,7 +12,7 @@ class LocalManager
   end
 
   def get_files
-    @files = Dir[File.join(@root, '**', '*')].reject{|f| File.directory?(f)}
+    @files = Helper.dir_glob(File.join(@root, '**', '*'), @config['follow_symlinks']).reject{|f| File.directory?(f)}
     @files = @files.collect{|file| file.sub @root, ''}
     @files = @files.reject{|f| Helper.file_ignored?(f, @config) || too_large?(f)}
   end
