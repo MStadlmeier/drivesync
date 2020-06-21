@@ -40,6 +40,29 @@ Ideally, you shouldn't have to sync your Drive manually, so let's run DriveSync 
 
 This will attempt to run DriveSync every minute. If DriveSync is started, but a sync is already in progress then the program will terminate and let the sync finish. You can also redirect the software's output into a log file so you can keep track of what is being synced or any errors that might occur: `ruby path/to/drivesync/drivesync.rb > /tmp/drivesync.log`
 
+## Installation using docker or podman
+You don't want to install Ruby on your Linux host? It is very easy to build the source in a ruby container and run it using Docker or [Podman](https://podman.io/whatis.html).
+
+Build drivesync in a Ruby image:
+
+```
+$ docker build -t drivesync .
+```
+
+Run the image with drivesync:
+
+```
+$ mkdir /root/Documents/drive
+$ mkdir /root/.credentials
+$ mkdir /root/.drivesync
+$ docker run -it -v /etc/localtime:/etc/localtime:ro \
+                 -v /root/Documents/drive:/root/Documents/drive:z \
+                 -v /root/.credentials:/root/.credentials:z \
+                 -v /root/.drivesync:/root/.drivesync:z \
+                 drivesync \
+                 ruby drivesync.rb
+```
+
 ## Large files
 Personally, I wouldn't advise automatically syncing "large" (anything in the several hundred MB range) files between platforms with this or any other software. By default, DriveSync will ignore any file above 512 MB but this can be changed in the config file. If you do this, you may have to increase the timeout threshold which can also be done in the config file.
 
