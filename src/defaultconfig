@@ -39,9 +39,10 @@ inclusion: blacklist
 #(whitelist) / won't (blacklist) be synced.
 #Globs [https://en.wikipedia.org/wiki/Glob_(programming)] are allowed
 #Examples: blacklist: ["foo.bar","secret_*.txt","hidden/docs/*"] / whitelist: ["sync/*", "logs.tar.gz"]
-
+#The exceptions option can be used to exclude files and folders from the whitelist or blacklist, respectively blocking or allowing their synchronization
 blacklist: []
 whitelist: []
+exceptions: []
 
 #If true, files that have been shared with you will be synced as well, 
 #as long as you added them to your Drive
@@ -52,4 +53,4 @@ sync_shared_in_drive: false
 #Default: false
 follow_symlinks: false
 
-config_version: 1.3
+config_version: 1.4

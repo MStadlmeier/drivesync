@@ -2,15 +2,20 @@ class Helper
   def self.file_ignored? path, config
     if config['inclusion'] == 'whitelist'
       config['whitelist'].each do |entry|
-        return false if File.fnmatch entry, path
+        return false if File.fnmatch(entry, path) and !exception_for?(config, path)
       end
       return true
     else
       config['blacklist'].each do |entry|
-        return true if File.fnmatch entry, path
+        return true if File.fnmatch(entry, path) and !exception_for?(config, path)
       end
       return false
     end
+  end
+
+  def self.exception_for? config, path
+    return false unless config['exceptions']
+    return config['exceptions'].any? {|ex| File.fnmatch(ex, path)}
   end
 
   #Returns true if the path looks ok to delete(not empty, root or home directory)

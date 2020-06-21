@@ -273,6 +273,8 @@ class Synchronizer
       elsif @config['allow_remote_deletion']
         delete_remote_file file, @drive
         remove_from_manifest file.path
+      else
+        puts "Not deleting #{file.path} remotely because the configuration prohibits it."
       end
     end
 

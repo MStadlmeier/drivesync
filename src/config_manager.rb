@@ -5,7 +5,7 @@ class ConfigManager
   CONFIG_PATH = File.expand_path('~/.drivesync/config.yml')
   CONFIG_PATH_OLD = File.expand_path("..", File.dirname(__FILE__)) + "/config.yml"
   DEFAULT_CONFIG_PATH = File.dirname(__FILE__) + '/defaultconfig'
-  CONFIG_VERSION = 1.3
+  CONFIG_VERSION = 1.4
 
   attr_accessor :config
 
@@ -41,7 +41,7 @@ class ConfigManager
   end
 
   def migrate
-    old_version = config['config_version'].nil? ? 0 : config['config_version']
+    old_version = config['config_version'] || 0
     added_lines = []
     removed_lines = []
     blacklist_contents = ''
@@ -65,6 +65,11 @@ class ConfigManager
 
     if @config['follow_symlinks'].nil?
       added_lines << "#If true, symlinks inside your local drive folder will be followed\n#Default: false\nfollow_symlinks: false\n"
+    end
+
+    if @config['exceptions'].nil?
+      added_lines << "#The exceptions option can be used to exclude files and folders from the whitelist or blacklist, respectively blocking or allowing their synchronization"
+      added_lines << "exceptions: []"
     end
 
     added_lines << "config_version: #{CONFIG_VERSION}"

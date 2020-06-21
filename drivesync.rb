@@ -8,7 +8,7 @@ CHANGELOG_URL = 'https://raw.githubusercontent.com/MStadlmeier/drivesync/master/
 def check_for_update
   #Not at all hacky way of checking for updates
   begin
-    changelog = open(CHANGELOG_URL).read
+    changelog = URI.open(CHANGELOG_URL).read
     version = changelog.split("\n").first.split(' ')[1].strip
     if version != VERSION
       puts "New version available - latest version is: #{version}"
