@@ -10,7 +10,7 @@ require_relative './helper'
 include Log
 
 class DriveManager
-  OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
+  OOB_URI = 'http://localhost'
   SCOPE = Google::Apis::DriveV3::AUTH_DRIVE
   CREDENTIALS_PATH = File.join(Dir.home, '.credentials',
                                "drivesync.yaml")
@@ -34,13 +34,28 @@ class DriveManager
     if credentials.nil?
       url = authorizer.get_authorization_url(
         base_url: OOB_URI)
-      puts "Open the following URL in the browser and enter the " +
-           "resulting code after authorization"
+      puts "Open the following URL in your browser:"
       puts url
+      begin
+        require 'launchy'
+        puts "Attempting to open the URL in your default browser..."
+        Launchy.open(url)
+      rescue LoadError
+        puts "Launchy gem not installed; please open the URL manually."
+      rescue StandardError => e
+        puts "Failed to open browser automatically: #{e.message}"
+        puts "Please open the URL manually."
+      end
+      print "Enter the authorization code: "
       code = STDIN.gets
       credentials = authorizer.get_and_store_credentials_from_code(
         user_id: user_id, code: code, base_url: OOB_URI)
     end
+  	# Force token refresh if expired and refresh_token is available
+  	if credentials.expired? && credentials.refresh_token
+  	  Log.log_notice "Access token expired – refreshing using refresh_token..."
+  	  credentials.fetch_access_token!
+  	end
     credentials
   end
 
